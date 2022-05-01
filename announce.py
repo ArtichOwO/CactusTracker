@@ -10,6 +10,7 @@ from utils import params_verif_factory
 async def announce(result: bool, request: Request) -> Response:
     username = request.match_info["username"]
     passwd = request.match_info["passwd"]
+    ip_addr = request.match_info["ip_addr"]
 
     if result:
         return_content = {
@@ -32,20 +33,20 @@ async def announce(result: bool, request: Request) -> Response:
                     old_peers: list[dict] = []
 
                     for peer in torrent["peers"]:
-                        if peer["ip"] != request.match_info["ip_addr"]:
+                        if peer["ip"] != ip_addr:
                             old_peers.append(peer)
 
-                    complete = [ip for ip in torrent["complete"] if ip != request.match_info["ip_addr"]]
-                    incomplete = [ip for ip in torrent["incomplete"] if ip != request.match_info["ip_addr"]]
+                    complete = [ip for ip in torrent["complete"] if ip != ip_addr]
+                    incomplete = [ip for ip in torrent["incomplete"] if ip != ip_addr]
 
                     if request.query["left"] == "0":
-                        complete.append(request.match_info["ip_addr"])
+                        complete.append(ip_addr)
                     else:
-                        incomplete.append(request.match_info["ip_addr"])
+                        incomplete.append(ip_addr)
 
                     new_peers = old_peers + [{
                         "peer_id": request.query["peer_id"],
-                        "ip": request.match_info["ip_addr"],
+                        "ip": ip_addr,
                         "port": request.query["port"]
                     }]
 
