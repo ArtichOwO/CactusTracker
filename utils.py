@@ -7,7 +7,7 @@ from base64 import b64decode
 
 def admin_auth(function):
     async def wrapper(request: Request, *args, **kwargs) -> Response | FileResponse:
-        response401 = Response(text="401", status=401, headers={"WWW-Authenticate": "Basic"})
+        response401 = error_page("401 Unauthorized", status=401, headers={"WWW-Authenticate": "Basic"})
         
         if "Authorization" not in request.headers.keys():
             return response401
@@ -28,3 +28,15 @@ def params_verif_factory(required: list[str]):
             return await function(result, request, *args, **kwargs)
         return wrapper
     return params_verif
+
+
+def error_page(error: str, status=200, headers=None) -> Response:
+    with open("./content/error_top.html", "rb") as error_top:
+        error_top = error_top.read()
+
+    with open("./content/error_bottom.html", "rb") as error_bottom:
+        error_bottom = error_bottom.read()
+
+    return Response(body=error_top+bytes(error, "utf8")+error_bottom,
+                    status=status, headers=headers,
+                    content_type="text/html")

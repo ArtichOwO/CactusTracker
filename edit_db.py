@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from database import db
 from aiohttp.web import Request, Response, FileResponse, json_response
-from utils import params_verif_factory, admin_auth
+from utils import params_verif_factory, admin_auth, error_page
 
 
 @admin_auth
@@ -11,7 +11,7 @@ async def create_user(result: bool, request: Request) -> Response | FileResponse
     query = request.query
 
     if result:
-        return FileResponse("./content/403.html", status=403)
+        return error_page("Missing parameters")
 
     await db.set(query["user"], {
         "passwd": query["passwd"]
@@ -32,7 +32,7 @@ async def erase_db(request: Request) -> Response | FileResponse:
 @params_verif_factory(["info_hash"])
 async def register_hash(result: bool, request: Request) -> Response | FileResponse:
     if result:
-        return FileResponse("./content/403.html", status=403)
+        return error_page("Missing parameters")
 
     await db.set(f"hash_{request.query['info_hash']}", {
         "complete": [],
