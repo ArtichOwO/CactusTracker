@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import logging
 import asyncio
+import os
 from aiohttp import web
-from aiohttp.web import Request
+from aiohttp.web import Request, Response, FileResponse
 
 from announce import announce
 from edit_db import create_user, erase_db, register_hash, dump_db
@@ -23,14 +26,24 @@ def create_error_middleware():
     return error_middleware
 
 
+async def res_handler(request: Request) -> Response | FileResponse:
+    if os.path.exists(f"./content/{request.match_info['path']}"):
+        return FileResponse(f"./content/{request.match_info['path']}")
+    else:
+        return error_page("404: Not found :(", 404)
+
+
 async def run_web_server():
     app = web.Application(middlewares=[create_error_middleware()])
-    app.add_routes([web.post("/create_user", create_user),
-                    web.post("/delete_all", erase_db),
-                    web.post("/register_hash", register_hash),
-                    web.get("/dump_db", dump_db),
-                    web.get("/announce/{username}/{passwd}/{ip_addr}", announce),
-                    web.get("/", (lambda req: web.FileResponse("./content/index.html")))])
+    app.add_routes([
+        web.post("/create_user", create_user),
+        web.post("/delete_all", erase_db),
+        web.post("/register_hash", register_hash),
+        web.get("/dump_db", dump_db),
+        web.get("/announce/{username}/{passwd}/{ip_addr}", announce),
+        web.get("/", (lambda req: web.FileResponse("./content/index.html"))),
+        web.get("/{path:.+}", res_handler)
+    ])
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, HOST, PORT)
