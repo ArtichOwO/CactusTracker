@@ -17,7 +17,8 @@ async def run_web_server():
                     web.get("/delete_all", erase_db),
                     web.get("/register_hash", register_hash),
                     web.get("/dump_db", dump_db),
-                    web.get("/announce/{username}/{passwd}/{ip_addr}", announce)])
+                    web.get("/announce/{username}/{passwd}/{ip_addr}", announce),
+                    web.get("/", (lambda req: web.FileResponse("./content/index.html")))])
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, HOST, PORT)
