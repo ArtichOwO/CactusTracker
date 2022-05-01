@@ -13,9 +13,9 @@ CONTENT_PATH = "./content"
 
 async def run_web_server():
     app = web.Application()
-    app.add_routes([web.get("/create_user", create_user),
-                    web.get("/delete_all", erase_db),
-                    web.get("/register_hash", register_hash),
+    app.add_routes([web.post("/create_user", create_user),
+                    web.post("/delete_all", erase_db),
+                    web.post("/register_hash", register_hash),
                     web.get("/dump_db", dump_db),
                     web.get("/announce/{username}/{passwd}/{ip_addr}", announce),
                     web.get("/", (lambda req: web.FileResponse("./content/index.html")))])
