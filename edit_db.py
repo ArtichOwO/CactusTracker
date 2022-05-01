@@ -6,12 +6,8 @@ from utils import params_verif_factory, admin_auth, error_page
 
 
 @admin_auth
-@params_verif_factory(["user", "passwd"])
-async def create_user(result: bool, request: Request) -> Response | FileResponse:
-    query = request.query
-
-    if result:
-        return error_page("Missing parameters")
+async def create_user(request: Request) -> Response | FileResponse:
+    query = await request.post()
 
     await db.set(query["user"], {
         "passwd": query["passwd"]
@@ -29,10 +25,8 @@ async def erase_db(request: Request) -> Response | FileResponse:
 
 
 @admin_auth
-@params_verif_factory(["info_hash"])
-async def register_hash(result: bool, request: Request) -> Response | FileResponse:
-    if result:
-        return error_page("Missing parameters")
+async def register_hash(request: Request) -> Response | FileResponse:
+    query = request.post()
 
     await db.set(f"hash_{request.query['info_hash']}", {
         "complete": [],
