@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from database import db
-from aiohttp.web import Request, Response, FileResponse
+from aiohttp.web import Request, Response, FileResponse, json_response
 from utils import params_verif_factory
 
 
@@ -49,4 +49,4 @@ async def dump_db(result: bool, request: Request) -> Response | FileResponse:
     if result:
         return FileResponse("./content/403.html", status=403)
 
-    return Response(text=str(await db.to_dict()))
+    return json_response(await db.to_dict())
