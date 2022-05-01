@@ -31,12 +31,7 @@ def params_verif_factory(required: list[str]):
 
 
 def error_page(error: str, status=200, headers=None) -> Response:
-    with open("./content/error_top.html", "rb") as error_top:
-        error_top = error_top.read()
-
-    with open("./content/error_bottom.html", "rb") as error_bottom:
-        error_bottom = error_bottom.read()
-
-    return Response(body=error_top+bytes(error, "utf8")+error_bottom,
-                    status=status, headers=headers,
-                    content_type="text/html")
+    with open("content/error.html") as error_file:
+        return Response(body=bytes(error_file.read().replace("%%ERROR_STRING", error), "utf8"),
+                        status=status, headers=headers,
+                        content_type="text/html")
