@@ -32,20 +32,20 @@ async def announce(result: bool, request: Request) -> Response:
                     old_peers: list[dict] = []
 
                     for peer in torrent["peers"]:
-                        if peer["ip"] != request.remote:
+                        if peer["ip"] != request.match_info["ip_addr"]:
                             old_peers.append(peer)
 
-                    complete = [ip for ip in torrent["complete"] if ip != request.remote]
-                    incomplete = [ip for ip in torrent["incomplete"] if ip != request.remote]
+                    complete = [ip for ip in torrent["complete"] if ip != request.match_info["ip_addr"]]
+                    incomplete = [ip for ip in torrent["incomplete"] if ip != request.match_info["ip_addr"]]
 
                     if request.query["left"] == "0":
-                        complete.append(request.remote)
+                        complete.append(request.match_info["ip_addr"])
                     else:
-                        incomplete.append(request.remote)
+                        incomplete.append(request.match_info["ip_addr"])
 
                     new_peers = old_peers + [{
                         "peer_id": request.query["peer_id"],
-                        "ip": request.remote,
+                        "ip": request.match_info["ip_addr"],
                         "port": request.query["port"]
                     }]
 
@@ -55,7 +55,7 @@ async def announce(result: bool, request: Request) -> Response:
                         "peers": new_peers
                     })
 
-                    peers: list[dict] | str = new_peers
+                    peers: list[dict] | bytes = new_peers
 
                     if request.query["compact"] == "1":
                         compact_peers = b""
@@ -63,13 +63,9 @@ async def announce(result: bool, request: Request) -> Response:
                         for peer in peers:
                             for digit in peer["ip"].split("."):
                                 compact_peers += int(digit).to_bytes(1, "big")
-                                print(digit)
-
                             compact_peers += int(peer["port"]).to_bytes(2, "big")
-                            print("---------")
 
                         peers = compact_peers
-                        print(len(peers), peers)
 
                     return_content = {
                         "complete": len(complete),
