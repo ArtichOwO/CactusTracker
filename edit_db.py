@@ -44,5 +44,9 @@ async def register_hash(result: bool, request: Request) -> Response | FileRespon
     return Response(text="Done :3")
 
 
-async def dump_db(request: Request) -> Response:
+@params_verif_factory([], True)
+async def dump_db(result: bool, request: Request) -> Response | FileResponse:
+    if result:
+        return FileResponse("./content/403.html", status=403)
+
     return Response(text=str(await db.to_dict()))
