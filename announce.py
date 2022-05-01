@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from database import db
-from bencodepy import bencode
+from bencode import bencode
 from aiohttp.web import Request, Response
 from utils import params_verif_factory
 
