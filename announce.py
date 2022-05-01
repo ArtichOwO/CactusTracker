@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from database import db
-from bencode import bencode
+from bencode3 import bencode
 from aiohttp.web import Request, Response
 from utils import params_verif_factory
 
@@ -63,10 +63,13 @@ async def announce(result: bool, request: Request) -> Response:
                         for peer in peers:
                             for digit in peer["ip"].split("."):
                                 compact_peers += int(digit).to_bytes(1, "big")
+                                print(digit)
 
                             compact_peers += int(peer["port"]).to_bytes(2, "big")
+                            print("---------")
 
-                        peers = str(compact_peers)
+                        peers = compact_peers
+                        print(len(peers), peers)
 
                     return_content = {
                         "complete": len(complete),
