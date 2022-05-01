@@ -8,8 +8,6 @@ from utils import params_verif_factory
 
 @params_verif_factory(["info_hash", "peer_id", "port", "left", "compact"])
 async def announce(result: bool, request: Request) -> Response:
-    return_content = {}
-
     username = request.match_info["username"]
     passwd = request.match_info["passwd"]
 

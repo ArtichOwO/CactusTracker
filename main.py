@@ -1,8 +1,6 @@
 import logging
 import asyncio
 from aiohttp import web
-from urllib.parse import parse_qs, urlparse
-from database import db
 
 from announce import announce
 from edit_db import create_user, erase_db, register_hash, dump_db
