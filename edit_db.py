@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from database import db
 from aiohttp.web import Request, Response, FileResponse, json_response
-from utils import params_verif_factory, admin_auth, error_page
+from utils import admin_auth
 
 
 @admin_auth
@@ -26,9 +26,9 @@ async def erase_db(request: Request) -> Response | FileResponse:
 
 @admin_auth
 async def register_hash(request: Request) -> Response | FileResponse:
-    query = request.post()
+    query = await request.post()
 
-    await db.set(f"hash_{request.query['info_hash']}", {
+    await db.set(f"hash_{query['info_hash']}", {
         "complete": [],
         "incomplete": [],
         "peers": []
