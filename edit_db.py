@@ -1,42 +1,43 @@
-from __future__ import annotations
-
 from database import db
-from aiohttp.web import Request, Response, FileResponse, json_response
-from utils import admin_auth
 
 
-@admin_auth
-async def create_user(request: Request) -> Response | FileResponse:
-    query = await request.post()
+async def set_torrent(info_hash: str,
+                      complete: list[str] = None,
+                      incomplete: list[str] = None,
+                      peers: list = None):
+    if complete is None:
+        complete = []
+    if incomplete is None:
+        incomplete = []
+    if peers is None:
+        peers = []
 
-    await db.set(query["user"], {
-        "passwd": query["passwd"]
+    await db.set(f"torrent_{info_hash}", {
+        "info_hash": info_hash,
+        "complete": complete,
+        "incomplete": incomplete,
+        "peers": peers
     })
 
-    return Response(text=f"Created user {query['user']} successfully!")
+
+async def get_torrent(info_hash: str) -> dict:
+    return await db.get(f"torrent_{info_hash}")
 
 
-@admin_auth
-async def erase_db(request: Request) -> Response | FileResponse:
-    for key in await db.keys():
-        await db.delete(key)
-
-    return Response(text="Done :>")
+async def delete_torrent(info_hash: str):
+    await db.delete(f"torrent_{info_hash}")
 
 
-@admin_auth
-async def register_hash(request: Request) -> Response | FileResponse:
-    query = await request.post()
-
-    await db.set(f"hash_{query['info_hash']}", {
-        "complete": [],
-        "incomplete": [],
-        "peers": []
+async def set_user(username: str, passwd: str):
+    await db.set(f"user_{username}", {
+        "name": username,
+        "passwd": passwd
     })
 
-    return Response(text="Done :3")
+
+async def get_user(username: str) -> dict:
+    return await db.get(f"user_{username}")
 
 
-@admin_auth
-async def dump_db(request: Request) -> Response | FileResponse:
-    return json_response(await db.to_dict())
+async def delete_user(name: str):
+    await db.delete(f"user_{name}")

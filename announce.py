@@ -3,7 +3,8 @@ from __future__ import annotations
 from database import db
 from bencode3 import bencode
 from aiohttp.web import Request, Response
-from utils import params_verif_factory
+from utils import params_verif_factory, decode_hash
+from edit_db import set_torrent, get_torrent, get_user
 
 
 @params_verif_factory(["info_hash", "peer_id", "port", "left", "compact"])
@@ -19,7 +20,7 @@ async def announce(result: bool, request: Request) -> Response:
         }
     else:
         try:
-            user: dict = await db.get(username)
+            user: dict = await get_user(username)
 
             if user["passwd"] != passwd:
                 return_content = {
@@ -28,7 +29,11 @@ async def announce(result: bool, request: Request) -> Response:
                 }
             else:
                 try:
-                    torrent: dict = await db.get(f"hash_{request.query['info_hash']}")
+                    info_hash = dict([(param.split("=")[0], param.split("=")[1])
+                                      for param in request.query_string.split("&")])["info_hash"]
+                    info_hash = decode_hash(info_hash)
+
+                    torrent: dict = await get_torrent(info_hash)
 
                     old_peers: list[dict] = []
 
@@ -50,11 +55,7 @@ async def announce(result: bool, request: Request) -> Response:
                         "port": request.query["port"]
                     }]
 
-                    await db.set(f"hash_{request.query['info_hash']}", {
-                        "complete": complete,
-                        "incomplete": incomplete,
-                        "peers": new_peers
-                    })
+                    await set_torrent(info_hash, complete, incomplete, new_peers)
 
                     peers: list[dict] | bytes = new_peers
 

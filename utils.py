@@ -1,8 +1,11 @@
 from __future__ import annotations
+from typing import Callable
 
 from aiohttp.web import Request, Response, FileResponse
 from config import ADMIN_PASSWD, ADMIN_USERNAME
 from base64 import b64decode
+from random import choice
+import os
 
 
 def admin_auth(function):
@@ -21,17 +24,35 @@ def admin_auth(function):
 
 
 def params_verif_factory(required: list[str]):
-    def params_verif(function):
-        async def wrapper(request: Request, *args, **kwargs) -> Response | FileResponse:
+    def params_verif(function: Callable):
+        async def wrapper(request: Request) -> Response | FileResponse:
             result = len(set(required) & set(request.query.keys())) != len(required)
 
-            return await function(result, request, *args, **kwargs)
+            return await function(result, request)
         return wrapper
     return params_verif
 
 
 def error_page(error: str, status=200, headers=None) -> Response:
     with open("content/error.html") as error_file:
-        return Response(body=bytes(error_file.read().replace("%%ERROR_STRING", error), "utf8"),
+        return Response(body=replace_banner_filename(error_file.read().replace("%%ERROR_STRING", error)),
                         status=status, headers=headers,
                         content_type="text/html")
+
+
+def replace_banner_filename(content: str) -> bytes:
+    banners: list[str] = os.listdir("./content/banners")
+    return bytes(content.replace("%%BANNER_FILENAME", choice(banners)), "utf8")
+
+
+def decode_hash(info_hash: str) -> str:
+    info_hash = [char for char in info_hash]
+    result = ""
+
+    while info_hash:
+        if (char := info_hash.pop(0)) == "%":
+            result += hex(int(info_hash.pop(0) + info_hash.pop(0), 16))[2:].rjust(2, "0")
+        else:
+            result += hex(ord(char))[2:].rjust(2, "0")
+
+    return result

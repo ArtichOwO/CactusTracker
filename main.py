@@ -7,8 +7,9 @@ from aiohttp import web
 from aiohttp.web import Request, Response, FileResponse
 
 from announce import announce
-from edit_db import create_user, erase_db, register_hash, dump_db
-from utils import error_page
+from utils import error_page, replace_banner_filename
+from admin import admin_homepage, admin_post
+from database import db
 
 
 HOST = "0.0.0.0"
@@ -33,15 +34,29 @@ async def res_handler(request: Request) -> Response | FileResponse:
         return error_page("404: Not found :(", 404)
 
 
+async def index(request: Request) -> Response:
+    with open("./content/index.html") as index_file:
+        index_file = index_file.read()
+
+        user_list = await db.list("user_")
+        user_list = "".join([f"<li>{(await db.get(user))['name']}</li>" for user in user_list])
+        torrent_list = await db.list("torrent_")
+        torrent_list = "".join([f"<li>{(await db.get(torrent))['info_hash']}</li>" for torrent in torrent_list])
+
+        index_file = index_file.replace("%%USER_LIST", f"<ul>{user_list}</ul>")\
+                               .replace("%%TORRENT_LIST", f"<ul>{torrent_list}</ul>")
+
+        return Response(body=replace_banner_filename(index_file),
+                        content_type="text/html")
+
+
 async def run_web_server():
     app = web.Application(middlewares=[create_error_middleware()])
     app.add_routes([
-        web.post("/create_user", create_user),
-        web.post("/delete_all", erase_db),
-        web.post("/register_hash", register_hash),
-        web.get("/dump_db", dump_db),
+        web.post("/admin/{instruction}", admin_post),
+        web.get("/admin", admin_homepage),
         web.get("/announce/{username}/{passwd}/{ip_addr}", announce),
-        web.get("/", (lambda req: web.FileResponse("./content/index.html"))),
+        web.get("/", index),
         web.get("/{path:.+}", res_handler)
     ])
     runner = web.AppRunner(app)
@@ -50,15 +65,9 @@ async def run_web_server():
     await site.start()
 
 
-async def run_other_task():
-    while True:
-        await asyncio.sleep(1)
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    logging.info("Server starting")
     loop = asyncio.get_event_loop()
     loop.create_task(run_web_server())
-    loop.run_until_complete(run_other_task())
     loop.run_forever()
-

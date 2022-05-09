@@ -1,0 +1,86 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Cactus Tracker</title>
+
+        <link rel="stylesheet" href="https://unpkg.com/98.css">
+        <link rel="stylesheet" href="/style.css">
+    </head>
+
+    <body>
+        <div class="window" style="width: 500px; margin: 0 auto">
+            <div class="title-bar">
+                <div class="title-bar-text">Cactus Tracker - Admin</div>
+
+                <div class="title-bar-controls">
+                    <form action="/" style="display: inline; margin: 0">
+                        <button aria-label="Close" style="margin: 0"></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="window-body">
+                <img src="/banners/%%BANNER_FILENAME" alt="banner" style="width: 100%">
+
+                <hr>
+
+                <form action="/admin/create_user" method="post">
+                    <p><strong>Create user</strong></p>
+
+                    <div class="field-row">
+                        <label for="username">Username</label>
+                        <input id="username" type="text" name="username"/>
+                    </div>
+
+                    <div class="field-row">
+                        <label for="passwd">Password</label>
+                        <input id="passwd" type="password" name="passwd"/>
+                    </div>
+
+                    <button>OK</button>
+                </form>
+
+                <hr>
+
+                <form action="/admin/register_hash" method="post">
+                    <p><strong>Register hash</strong></p>
+
+                    <div class="field-row">
+                        <label for="info_hash">Hash</label>
+                        <input id="info_hash" type="text" name="info_hash"/>
+                    </div>
+
+                    <button>OK</button>
+                </form>
+
+                <hr>
+
+                <ul class="tree-view">
+                    <li>
+                        <details open>
+                            <summary>Users</summary>
+                            <ul>%%USER_LIST</ul>
+                        </details>
+                    </li>
+                    <li>
+                        <details open>
+                            <summary>Torrents</summary>
+                            <ul>%%TORRENT_LIST</ul>
+                        </details>
+                    </li>
+                </ul>
+
+                <hr>
+
+                <form action="/admin/delete_all" method="post">
+                    <button>Delete all database entries</button>
+                </form>
+
+                <hr>
+            </div>
+        </div>
+    </body>
+</html>
