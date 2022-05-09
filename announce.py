@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from database import db
 from bencode3 import bencode
 from aiohttp.web import Request, Response
 from utils import params_verif_factory, decode_hash
@@ -35,7 +34,7 @@ async def announce(result: bool, request: Request) -> Response:
 
                     torrent: dict = await get_torrent(info_hash)
 
-                    old_peers: list[dict] = []
+                    old_peers: list = []
 
                     for peer in torrent["peers"]:
                         if peer["ip"] != ip_addr:

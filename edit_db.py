@@ -2,8 +2,8 @@ from database import db
 
 
 async def set_torrent(info_hash: str,
-                      complete: list[str] = None,
-                      incomplete: list[str] = None,
+                      complete: list = None,
+                      incomplete: list = None,
                       peers: list = None):
     if complete is None:
         complete = []

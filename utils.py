@@ -23,7 +23,7 @@ def admin_auth(function):
     return wrapper
 
 
-def params_verif_factory(required: list[str]):
+def params_verif_factory(required: list):
     def params_verif(function: Callable):
         async def wrapper(request: Request) -> Response | FileResponse:
             result = len(set(required) & set(request.query.keys())) != len(required)
