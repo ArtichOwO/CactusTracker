@@ -41,7 +41,16 @@ async def index(request: Request) -> Response:
         user_list = await db.list("user_")
         user_list = "".join([f"<li>{(await db.get(user))['name']}</li>" for user in user_list])
         torrent_list = await db.list("torrent_")
-        torrent_list = "".join([f"<li>{(await db.get(torrent))['info_hash']}</li>" for torrent in torrent_list])
+        torrent_list = "".join([f"<li>"
+                                f"    <details>"
+                                f"        <summary>{(value := await db.get(torrent))['meta']['name']}</summary>"
+                                f"        <li>Description: {value['meta']['description']}</li>"
+                                f"        <li>Created by: {value['meta']['username']}</li>"
+                                f"        <li>Hash: {value['info_hash']}</li>"
+                                f"        <li>Seed: {len(value['complete'])}</li>"
+                                f"        <li>Leech: {len(value['incomplete'])}</li>"
+                                f"    </details>"
+                                f"</li>" for torrent in torrent_list])
 
         index_file = index_file.replace("%%USER_LIST", f"<ul>{user_list}</ul>")\
                                .replace("%%TORRENT_LIST", f"<ul>{torrent_list}</ul>")

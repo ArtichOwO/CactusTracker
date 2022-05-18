@@ -2,6 +2,9 @@ from database import db
 
 
 async def set_torrent(info_hash: str,
+                      username: str,
+                      name: str,
+                      description: str = "No description provided",
                       complete: list = None,
                       incomplete: list = None,
                       peers: list = None):
@@ -13,6 +16,11 @@ async def set_torrent(info_hash: str,
         peers = []
 
     await db.set(f"torrent_{info_hash}", {
+        "meta": {
+            "name": name,
+            "description": description,
+            "username": username
+        },
         "info_hash": info_hash,
         "complete": complete,
         "incomplete": incomplete,

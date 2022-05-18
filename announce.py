@@ -54,7 +54,9 @@ async def announce(result: bool, request: Request) -> Response:
                         "port": request.query["port"]
                     }]
 
-                    await set_torrent(info_hash, complete, incomplete, new_peers)
+                    await set_torrent(info_hash, username,
+                                      torrent["meta"]["name"], torrent["meta"]["description"],
+                                      complete, incomplete, new_peers)
 
                     peers: list[dict] | bytes = new_peers
 

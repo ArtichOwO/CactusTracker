@@ -12,22 +12,31 @@ async def admin_homepage(request: Request) -> Response:
         user_list = await db.list("user_")
         torrent_list = await db.list("torrent_")
 
-        async def create_list(action: str, params: list[str], param_name: str):
-            return "".join([f"<li>"
-                            f"    <form action=\"{action}\" method=\"post\" class=\"field-row\">"
-                            f"        <label for=\"{param_name}\">"
-                            f"            {(value := (await db.get(param))[param_name])}"
-                            f"        </label>"
-                            f"        <input type=\"hidden\" "
-                            f"               value=\"{value}\" "
-                            f"               id=\"{param_name}\" "
-                            f"               name=\"{param_name}\"/>"
-                            f"        <button>Delete</button>"
-                            f"    </form>"
-                            f"</li>" for param in params])
+        user_list = "".join([f"<li>"
+                             f"    <form action=\"/admin/delete_user\" method=\"post\" class=\"field-row\">"
+                             f"        <label for=\"name\">"
+                             f"            {(value := (await db.get(user))['name'])}"
+                             f"        </label>"
+                             f"        <input type=\"hidden\" "
+                             f"               value=\"{value}\" "
+                             f"               id=\"name\" "
+                             f"               name=\"name\"/>"
+                             f"        <button>Delete</button>"
+                             f"    </form>"
+                             f"</li>" for user in user_list])
 
-        torrent_list = await create_list("/admin/delete_torrent", torrent_list, "info_hash")
-        user_list = await create_list("/admin/delete_user", user_list, "name")
+        torrent_list = "".join([f"<li>"
+                                f"    <form action=\"/admin/delete_torrent\" method=\"post\" class=\"field-row\">"
+                                f"        <label for=\"info_hash\">"
+                                f"            {(value := (await db.get(torrent)))['meta']['name']}"
+                                f"        </label>"
+                                f"        <input type=\"hidden\" "
+                                f"               value=\"{value['info_hash']}\" "
+                                f"               id=\"info_hash\" "
+                                f"               name=\"info_hash\"/>"
+                                f"        <button>Delete</button>"
+                                f"    </form>"
+                                f"</li>" for torrent in torrent_list])
 
         admin_page = admin_page.read()\
             .replace("%%USER_LIST", user_list)\
@@ -48,7 +57,10 @@ async def admin_post(request: Request) -> Response | FileResponse:
         for key in await db.keys():
             await db.delete(key)
     elif instruction == "register_hash":
-        await set_torrent(query["info_hash"])
+        await set_torrent(query["info_hash"],
+                          query["username"],
+                          query["name"],
+                          query["description"])
     elif instruction == "delete_torrent":
         await delete_torrent(query["info_hash"])
     elif instruction == "delete_user":
